@@ -92,14 +92,14 @@ export async function GET() {
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([month, valueOre]) => ({ month, value: nok(valueOre) }));
 
-  const monthGoals = goals.filter((g) => g.period === "MONTH").map((g) => ({
+  const monthGoals = goals.filter((g: any) => g.period === "MONTH").map((g: any) => ({
     id: g.id,
     title: g.title,
     period: g.period,
     limit: nok(g.limitOre),
   }));
 
-  const yearGoals = goals.filter((g) => g.period === "YEAR").map((g) => ({
+  const yearGoals = goals.filter((g: any) => g.period === "YEAR").map((g: any) => ({
     id: g.id,
     title: g.title,
     period: g.period,
