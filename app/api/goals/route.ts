@@ -8,12 +8,20 @@ export async function GET() {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Ikke innlogget" }, { status: 401 });
 
-  const items = await prisma.category.findMany({
+  const items = await prisma.goal.findMany({
     where: { userId: session.userId },
-    orderBy: { name: "asc" },
+    orderBy: { createdAt: "desc" },
   });
 
-  return NextResponse.json({ items });
+  return NextResponse.json({
+    items: items.map((g) => ({
+      id: g.id,
+      title: g.title,
+      period: g.period,
+      limit: g.limitOre / 100,
+      createdAt: g.createdAt,
+    })),
+  });
 }
 
 export async function POST(req: Request) {
@@ -21,19 +29,29 @@ export async function POST(req: Request) {
   if (!session) return NextResponse.json({ error: "Ikke innlogget" }, { status: 401 });
 
   const body = await req.json().catch(() => null);
-  const name = typeof body?.name === "string" ? body.name.trim() : "";
-  const color = typeof body?.color === "string" ? body.color.trim() : "#6366f1";
 
-  if (name.length < 2) return NextResponse.json({ error: "Navn må være minst 2 tegn" }, { status: 400 });
+  const title = typeof body?.title === "string" ? body.title.trim() : "";
+  const period = body?.period === "YEAR" ? "YEAR" : "MONTH";
+  const limit = Number(body?.limit);
 
-  try {
-    const item = await prisma.category.create({
-      data: { name, color, userId: session.userId },
-    });
-    return NextResponse.json({ item });
-  } catch {
-    return NextResponse.json({ error: "Kategorien finnes allerede" }, { status: 409 });
-  }
+  if (title.length < 2) return NextResponse.json({ error: "Tittel må være minst 2 tegn" }, { status: 400 });
+  if (!Number.isFinite(limit) || limit <= 0) return NextResponse.json({ error: "Beløp må være større enn 0" }, { status: 400 });
+
+  const limitOre = Math.round(limit * 100);
+
+  const item = await prisma.goal.create({
+    data: { title, period, limitOre, userId: session.userId },
+  });
+
+  return NextResponse.json({
+    item: {
+      id: item.id,
+      title: item.title,
+      period: item.period,
+      limit: item.limitOre / 100,
+      createdAt: item.createdAt,
+    },
+  });
 }
 
 export async function DELETE(req: Request) {
@@ -44,7 +62,7 @@ export async function DELETE(req: Request) {
   const id = searchParams.get("id");
   if (!id) return NextResponse.json({ error: "Mangler id" }, { status: 400 });
 
-  await prisma.category.delete({
+  await prisma.goal.delete({
     where: { id, userId: session.userId },
   });
 
