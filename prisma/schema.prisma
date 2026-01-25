@@ -1,17 +1,74 @@
 generator client {
   provider   = "prisma-client-js"
-  engineType = "binary"
+  engineType = "client"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
+enum TransactionType {
+  EXPENSE
+  INCOME
+}
+
+enum GoalPeriod {
+  MONTH
+  YEAR
+}
+
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
+  id           String        @id @default(uuid())
+  email        String        @unique
   name         String
   passwordHash String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  categories   Category[]
+  transactions Transaction[]
+  goals        Goal[]
+}
+
+model Category {
+  id        String        @id @default(uuid())
+  name      String
+  color     String
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  transactions Transaction[]
+
+  @@unique([userId, name])
+}
+
+model Transaction {
+  id          String          @id @default(uuid())
+  type        TransactionType
+  amountOre   Int
+  description String?
+  date        DateTime
+  userId      String
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId  String?
+  category    Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  @@index([userId, date])
+  @@index([userId, type])
+  @@index([categoryId])
+}
+
+model Goal {
+  id        String     @id @default(uuid())
+  title     String
+  period    GoalPeriod
+  limitOre  Int
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
 }
