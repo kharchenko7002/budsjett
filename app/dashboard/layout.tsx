@@ -38,6 +38,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Link className="block rounded-xl px-3 py-2 hover:bg-white/10 transition" href="/dashboard/goals">
                 Mål
               </Link>
+              <Link className="block rounded-xl px-3 py-2 hover:bg-white/10 transition" href="/dashboard/debts">
+  Gjeld
+</Link>
+
             </nav>
           </aside>
 

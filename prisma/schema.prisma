@@ -17,6 +17,11 @@ enum GoalPeriod {
   YEAR
 }
 
+enum DebtDirection {
+  I_OWE
+  OWED_TO_ME
+}
+
 model User {
   id           String        @id @default(uuid())
   email        String        @unique
@@ -28,6 +33,7 @@ model User {
   categories   Category[]
   transactions Transaction[]
   goals        Goal[]
+  debts        Debt[]
 }
 
 model Category {
@@ -71,4 +77,22 @@ model Goal {
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
+}
+
+model Debt {
+  id        String        @id @default(uuid())
+  direction DebtDirection
+  person    String
+  reason    String?
+  amountOre Int
+  date      DateTime
+  isPaid    Boolean       @default(false)
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([userId, direction])
+  @@index([userId, isPaid])
+  @@index([userId, date])
 }
