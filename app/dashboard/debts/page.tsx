@@ -249,7 +249,7 @@ export default function DebtsPage() {
               <div className="text-slate-300">Ingen poster.</div>
             ) : (
               <div className="space-y-2">
-                {items.map((d) => (
+                {items.map((d: any) => (
                   <div key={d.id} className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <div className="flex items-center gap-2">

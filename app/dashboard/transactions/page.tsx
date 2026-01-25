@@ -188,7 +188,7 @@ export default function TransactionsPage() {
                 className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-slate-100 outline-none focus:border-white/20"
               >
                 <option value="">Ukategorisert</option>
-                {categories.map((c) => (
+                {categories.map((c: any) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
                   </option>
@@ -236,7 +236,7 @@ export default function TransactionsPage() {
               <div className="text-slate-300">Ingen transaksjoner ennå.</div>
             ) : (
               <div className="space-y-2">
-                {items.map((t) => (
+                {items.map((t: any) => (
                   <div key={t.id} className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                     <div className="flex items-center gap-3">
                       <span

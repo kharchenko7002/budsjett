@@ -67,7 +67,7 @@ export async function GET() {
       color: "#94a3b8",
       value: nok(byCategoryMap.get("ukategorisert") ?? 0),
     },
-  ].filter((x) => x.value > 0);
+  ].filter((x: any) => x.value > 0);
 
   const monthDailyMap = new Map<string, number>();
   for (const t of monthTx) {
@@ -77,7 +77,7 @@ export async function GET() {
   }
 
   const monthDaily = [...monthDailyMap.entries()]
-    .sort((a, b) => a[0].localeCompare(b[0]))
+    .sort((a: any, b: any) => a[0].localeCompare(b[0]))
     .map(([date, valueOre]) => ({ date, value: nok(valueOre) }));
 
   const yearMonthlyMap = new Map<string, number>();
@@ -89,8 +89,8 @@ export async function GET() {
   }
 
   const yearMonthly = [...yearMonthlyMap.entries()]
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([month, valueOre]) => ({ month, value: nok(valueOre) }));
+    .sort((a: any, b: any) => a[0].localeCompare(b[0]))
+    .map(([month, valueOre]: any) => ({ month, value: nok(valueOre) }));
 
   const monthGoals = goals.filter((g: any) => g.period === "MONTH").map((g: any) => ({
     id: g.id,

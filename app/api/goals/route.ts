@@ -14,7 +14,7 @@ export async function GET() {
   });
 
   return NextResponse.json({
-    items: items.map((g) => ({
+    items: items.map((g: any) => ({
       id: g.id,
       title: g.title,
       period: g.period,

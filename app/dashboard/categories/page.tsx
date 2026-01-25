@@ -107,7 +107,7 @@ export default function CategoriesPage() {
             <div className="space-y-2">
               <label className="text-sm text-slate-300">Farge</label>
               <div className="flex flex-wrap gap-2">
-                {presets.map((c) => (
+                {presets.map((c: any) => (
                   <button
                     key={c}
                     type="button"
@@ -146,7 +146,7 @@ export default function CategoriesPage() {
               <div className="text-slate-300">Ingen kategorier ennå.</div>
             ) : (
               <div className="grid gap-2 sm:grid-cols-2">
-                {items.map((c) => (
+                {items.map((c: any) => (
                   <div key={c.id} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-3">
                     <div className="flex items-center gap-3">
                       <span className="h-3 w-3 rounded-full" style={{ background: c.color }} />

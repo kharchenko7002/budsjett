@@ -175,7 +175,7 @@ export default function GoalsPage() {
               <div className="text-slate-300">Ingen mål ennå.</div>
             ) : (
               <div className="space-y-2">
-                {items.map((g) => (
+                {items.map((g: any) => (
                   <div key={g.id} className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
                       <div className="text-sm font-medium">{g.title}</div>

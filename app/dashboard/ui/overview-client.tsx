@@ -101,7 +101,7 @@ export default function OverviewClient() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie data={data.byCategory} dataKey="value" nameKey="name" innerRadius={55} outerRadius={95}>
-                  {data.byCategory.map((c) => (
+                  {data.byCategory.map((c: any) => (
                     <Cell key={c.id} fill={c.color} />
                   ))}
                 </Pie>
@@ -111,7 +111,7 @@ export default function OverviewClient() {
           </div>
 
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
-            {data.byCategory.slice(0, 6).map((c) => (
+            {data.byCategory.slice(0, 6).map((c: any) => (
               <div key={c.id} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2">
                 <div className="flex items-center gap-2">
                   <span className="h-2.5 w-2.5 rounded-full" style={{ background: c.color }} />
