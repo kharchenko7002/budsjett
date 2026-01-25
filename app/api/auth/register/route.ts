@@ -3,10 +3,13 @@ import { registerSchema } from "@/lib/validators";
 import { createUser } from "@/lib/users";
 import { AUTH_COOKIE, signToken } from "@/lib/auth";
 
+export const runtime = "nodejs";
+
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const parsed = registerSchema.safeParse(body);
+
     if (!parsed.success) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
     }
@@ -14,7 +17,7 @@ export async function POST(req: Request) {
     const { email, name, password } = parsed.data;
     const user = await createUser(email, name, password);
 
-    const token = signToken({ sub: user.id, email: user.email, name: user.name });
+    const token = await signToken({ sub: user.id, email: user.email, name: user.name });
 
     const res = NextResponse.json({ ok: true });
     res.cookies.set(AUTH_COOKIE, token, {

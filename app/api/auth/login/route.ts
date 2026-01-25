@@ -3,6 +3,8 @@ import { loginSchema } from "@/lib/validators";
 import { verifyUser } from "@/lib/users";
 import { AUTH_COOKIE, signToken } from "@/lib/auth";
 
+export const runtime = "nodejs";
+
 export async function POST(req: Request) {
   const body = await req.json();
   const parsed = loginSchema.safeParse(body);
@@ -18,7 +20,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Feil e-post eller passord" }, { status: 401 });
   }
 
-  const token = signToken({ sub: user.id, email: user.email, name: user.name });
+  const token = await signToken({ sub: user.id, email: user.email, name: user.name });
 
   const res = NextResponse.json({ ok: true });
   res.cookies.set(AUTH_COOKIE, token, {
