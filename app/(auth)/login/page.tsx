@@ -54,9 +54,7 @@ export default function LoginPage() {
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
       setError(
-        data?.error?.formErrors?.[0] ??
-          data?.error ??
-          "Kunne ikke logge inn"
+        data?.error?.formErrors?.[0] ?? data?.error ?? "Kunne ikke logge inn"
       );
       return;
     }
@@ -65,56 +63,66 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="w-full max-w-md">
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/40 backdrop-blur">
-        <h1 className="text-2xl font-semibold">Logg inn</h1>
-        <p className="mt-2 text-slate-300">Velkommen tilbake.</p>
+    <main className="min-h-screen w-full bg-slate-950">
+      <div className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-4 py-10">
+        <div className="w-full max-w-md">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/40 backdrop-blur">
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-semibold">Logg inn</h1>
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
+                v1
+              </span>
+            </div>
 
-        {error && (
-          <div className="mt-4 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-            {error}
+            <p className="mt-2 text-slate-300">Velkommen tilbake.</p>
+
+            {error && (
+              <div className="mt-4 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={onSubmit} className="mt-6 space-y-4">
+              <Field
+                label="E-post"
+                type="email"
+                value={email}
+                onChange={setEmail}
+                placeholder="deg@eksempel.no"
+              />
+              <Field
+                label="Passord"
+                type="password"
+                value={password}
+                onChange={setPassword}
+                placeholder="••••••••"
+              />
+
+              <button
+                disabled={loading}
+                className="group relative w-full rounded-xl bg-indigo-500 px-4 py-3 font-medium text-white hover:bg-indigo-400 disabled:opacity-60 disabled:cursor-not-allowed transition"
+              >
+                <span className="absolute inset-0 -z-10 rounded-xl bg-indigo-500/30 blur-xl group-hover:bg-indigo-400/30 transition" />
+                {loading ? "Logger inn..." : "Logg inn"}
+              </button>
+
+              <div className="flex items-center justify-between text-sm text-slate-300">
+                <span className="text-slate-500">Glemt passord? (kommer senere)</span>
+                <Link
+                  href="/register"
+                  className="text-indigo-300 hover:text-indigo-200 underline underline-offset-4"
+                >
+                  Registrer deg
+                </Link>
+              </div>
+            </form>
           </div>
-        )}
 
-        <form onSubmit={onSubmit} className="mt-6 space-y-4">
-          <Field
-            label="E-post"
-            type="email"
-            value={email}
-            onChange={setEmail}
-            placeholder="deg@eksempel.no"
-          />
-          <Field
-            label="Passord"
-            type="password"
-            value={password}
-            onChange={setPassword}
-            placeholder="••••••••"
-          />
-
-          <button
-            disabled={loading}
-            className="group relative w-full rounded-xl bg-indigo-500 px-4 py-3 font-medium text-white hover:bg-indigo-400 disabled:opacity-60 disabled:cursor-not-allowed transition"
-          >
-            <span className="absolute inset-0 -z-10 rounded-xl bg-indigo-500/30 blur-xl group-hover:bg-indigo-400/30 transition" />
-            {loading ? "Logger inn..." : "Logg inn"}
-          </button>
-
-          <div className="flex items-center justify-between text-sm text-slate-300">
-            <span className="text-slate-500">Glemt passord? (kommer senere)</span>
-            <Link
-              href="/register"
-              className="text-indigo-300 hover:text-indigo-200 underline underline-offset-4"
-            >
-              Registrer deg
-            </Link>
-          </div>
-        </form>
+          <p className="mt-6 text-center text-xs text-slate-500">
+            Registrer deg først, og logg deretter inn.
+          </p>
+        </div>
       </div>
-
-      <p className="mt-6 text-center text-xs text-slate-500">
-        Registrer deg først, og logg deretter inn.
-      </p>
-    </div>
+    </main>
   );
 }

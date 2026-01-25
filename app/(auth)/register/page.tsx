@@ -66,65 +66,74 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="w-full max-w-md">
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/40 backdrop-blur">
-        <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-semibold">Registrer deg</h1>
-          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
-            v1
-          </span>
-        </div>
+    <main className="min-h-screen w-full bg-slate-950">
+      <div className="mx-auto flex min-h-screen w-full max-w-6xl items-center justify-center px-4 py-10">
+        <div className="w-full max-w-md">
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-6 shadow-2xl shadow-black/40 backdrop-blur">
+            <div className="flex items-center justify-between">
+              <h1 className="text-2xl font-semibold">Registrer deg</h1>
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
+                v1
+              </span>
+            </div>
 
-        <p className="mt-2 text-slate-300">
-          Opprett en konto for å gå videre.
-        </p>
+            <p className="mt-2 text-slate-300">
+              Opprett en konto for å gå videre.
+            </p>
 
-        {error && (
-          <div className="mt-4 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
-            {error}
+            {error && (
+              <div className="mt-4 rounded-xl border border-rose-500/30 bg-rose-500/10 px-4 py-3 text-sm text-rose-200">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={onSubmit} className="mt-6 space-y-4">
+              <Field
+                label="Navn"
+                value={name}
+                onChange={setName}
+                placeholder="Ola Nordmann"
+              />
+              <Field
+                label="E-post"
+                type="email"
+                value={email}
+                onChange={setEmail}
+                placeholder="deg@eksempel.no"
+              />
+              <Field
+                label="Passord"
+                type="password"
+                value={password}
+                onChange={setPassword}
+                placeholder="••••••••"
+              />
+
+              <button
+                disabled={loading}
+                className="group relative w-full rounded-xl bg-indigo-500 px-4 py-3 font-medium text-white hover:bg-indigo-400 disabled:opacity-60 disabled:cursor-not-allowed transition"
+              >
+                <span className="absolute inset-0 -z-10 rounded-xl bg-indigo-500/30 blur-xl group-hover:bg-indigo-400/30 transition" />
+                {loading ? "Oppretter..." : "Opprett konto"}
+              </button>
+
+              <p className="text-center text-sm text-slate-300">
+                Har du allerede en konto?{" "}
+                <Link
+                  href="/login"
+                  className="text-indigo-300 hover:text-indigo-200 underline underline-offset-4"
+                >
+                  Logg inn
+                </Link>
+              </p>
+            </form>
           </div>
-        )}
 
-        <form onSubmit={onSubmit} className="mt-6 space-y-4">
-          <Field label="Navn" value={name} onChange={setName} placeholder="Ola Nordmann" />
-          <Field
-            label="E-post"
-            type="email"
-            value={email}
-            onChange={setEmail}
-            placeholder="deg@eksempel.no"
-          />
-          <Field
-            label="Passord"
-            type="password"
-            value={password}
-            onChange={setPassword}
-            placeholder="••••••••"
-          />
-
-          <button
-            disabled={loading}
-            className="group relative w-full rounded-xl bg-indigo-500 px-4 py-3 font-medium text-white hover:bg-indigo-400 disabled:opacity-60 disabled:cursor-not-allowed transition"
-          >
-            <span className="absolute inset-0 -z-10 rounded-xl bg-indigo-500/30 blur-xl group-hover:bg-indigo-400/30 transition" />
-            {loading ? "Oppretter..." : "Opprett konto"}
-          </button>
-
-          <p className="text-center text-sm text-slate-300">
-            Har du allerede en konto?{" "}
-            <Link
-              href="/login"
-              className="text-indigo-300 hover:text-indigo-200 underline underline-offset-4"
-            >
-              Logg inn
-            </Link>
+          <p className="mt-6 text-center text-xs text-slate-500">
+            Ved å fortsette godtar du vilkårene (kommer senere).
           </p>
-        </form>
+        </div>
       </div>
-
-      <p className="mt-6 text-center text-xs text-slate-500">
-        Ved å fortsette godtar du vilkårene (kommer senere).
-      </p>
-    </div>
+    </main>
   );
 }
