@@ -55,7 +55,7 @@ export async function GET() {
   }
 
   const byCategory = [
-    ...categories.map((c) => ({
+    ...categories.map((c: any) => ({
       id: c.id,
       name: c.name,
       color: c.color,
