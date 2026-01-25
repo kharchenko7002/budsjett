@@ -35,7 +35,7 @@ export async function GET(req: Request) {
   });
 
   return NextResponse.json({
-    items: items.map((t) => ({
+    items: items.map((t: any) => ({
       ...t,
       amount: oreToNok(Number(t.amountOre)),
     })),
