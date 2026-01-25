@@ -22,7 +22,7 @@ export async function GET(req: Request) {
   });
 
   return NextResponse.json({
-    items: items.map((d) => ({
+    items: items.map((d: any) => ({
       id: d.id,
       direction: d.direction,
       person: d.person,
