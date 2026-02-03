@@ -14,6 +14,7 @@ import {
   BarChart,
   Bar,
 } from "recharts";
+import { useCurrency } from "@/app/providers/currency-provider";
 
 type Summary = {
   month: { expense: number; income: number };
@@ -27,11 +28,13 @@ type Summary = {
   };
 };
 
-function formatNok(v: number) {
-  return new Intl.NumberFormat("nb-NO", { style: "currency", currency: "NOK" }).format(v);
+function toOreFromNokNumber(v: number) {
+  return Math.round(v * 100);
 }
 
 export default function OverviewClient() {
+  const { formatFromOre, convertFromOre } = useCurrency();
+
   const [data, setData] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -74,22 +77,40 @@ export default function OverviewClient() {
     ? Math.min(100, Math.round((data.month.expense / bestMonthGoal.limit) * 100))
     : 0;
 
+  const monthExpenseOre = toOreFromNokNumber(data.month.expense);
+  const monthIncomeOre = toOreFromNokNumber(data.month.income);
+  const monthNetOre = toOreFromNokNumber(monthNet);
+
+  const yearExpenseOre = toOreFromNokNumber(data.year.expense);
+  const yearIncomeOre = toOreFromNokNumber(data.year.income);
+
+  const tooltipMoney = (v: any) => formatFromOre(toOreFromNokNumber(Number(v)));
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-3">
-        <Card title="Denne måneden" value={formatNok(data.month.expense)} subtitle="Utgifter" />
-        <Card title="Inntekter" value={formatNok(data.month.income)} subtitle="Denne måneden" />
-        <Card title="Netto" value={formatNok(monthNet)} subtitle={monthNet >= 0 ? "Pluss" : "Minus"} />
+        <Card title="Denne måneden" value={formatFromOre(monthExpenseOre)} subtitle="Utgifter" />
+        <Card title="Inntekter" value={formatFromOre(monthIncomeOre)} subtitle="Denne måneden" />
+        <Card
+          title="Netto"
+          value={formatFromOre(monthNetOre)}
+          subtitle={monthNet >= 0 ? "Pluss" : "Minus"}
+        />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel title="Utgifter per dag (denne måneden)">
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={data.monthDaily}>
+              <LineChart
+                data={data.monthDaily.map((d) => ({
+                  ...d,
+                  value: convertFromOre(toOreFromNokNumber(d.value)),
+                }))}
+              >
                 <XAxis dataKey="date" hide />
-                <YAxis tickFormatter={(v) => `${Math.round(v)}`} />
-                <Tooltip formatter={(v: any) => formatNok(Number(v))} />
+                <YAxis tickFormatter={(v) => `${Math.round(Number(v))}`} />
+                <Tooltip formatter={(v: any) => tooltipMoney(v)} />
                 <Line type="monotone" dataKey="value" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
@@ -100,24 +121,38 @@ export default function OverviewClient() {
           <div className="h-72">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
-                <Pie data={data.byCategory} dataKey="value" nameKey="name" innerRadius={55} outerRadius={95}>
-                  {data.byCategory.map((c: any) => (
+                <Pie
+                  data={data.byCategory.map((c) => ({
+                    ...c,
+                    value: convertFromOre(toOreFromNokNumber(c.value)),
+                  }))}
+                  dataKey="value"
+                  nameKey="name"
+                  innerRadius={55}
+                  outerRadius={95}
+                >
+                  {data.byCategory.map((c) => (
                     <Cell key={c.id} fill={c.color} />
                   ))}
                 </Pie>
-                <Tooltip formatter={(v: any) => formatNok(Number(v))} />
+                <Tooltip formatter={(v: any) => tooltipMoney(v)} />
               </PieChart>
             </ResponsiveContainer>
           </div>
 
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
-            {data.byCategory.slice(0, 6).map((c: any) => (
-              <div key={c.id} className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+            {data.byCategory.slice(0, 6).map((c) => (
+              <div
+                key={c.id}
+                className="flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2"
+              >
                 <div className="flex items-center gap-2">
                   <span className="h-2.5 w-2.5 rounded-full" style={{ background: c.color }} />
                   <span className="text-sm text-slate-200">{c.name}</span>
                 </div>
-                <span className="text-sm text-slate-300">{formatNok(c.value)}</span>
+                <span className="text-sm text-slate-300">
+                  {formatFromOre(toOreFromNokNumber(c.value))}
+                </span>
               </div>
             ))}
           </div>
@@ -127,15 +162,21 @@ export default function OverviewClient() {
       <div className="grid gap-4 lg:grid-cols-2">
         <Panel title="Året så langt">
           <div className="grid gap-3 sm:grid-cols-2">
-            <MiniStat label="Utgifter" value={formatNok(data.year.expense)} />
-            <MiniStat label="Inntekter" value={formatNok(data.year.income)} />
+            <MiniStat label="Utgifter" value={formatFromOre(yearExpenseOre)} />
+            <MiniStat label="Inntekter" value={formatFromOre(yearIncomeOre)} />
           </div>
+
           <div className="mt-5 h-72">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data.yearMonthly}>
+              <BarChart
+                data={data.yearMonthly.map((m) => ({
+                  ...m,
+                  value: convertFromOre(toOreFromNokNumber(m.value)),
+                }))}
+              >
                 <XAxis dataKey="month" tick={{ fill: "rgb(203 213 225)" }} />
-                <YAxis tickFormatter={(v) => `${Math.round(v)}`} />
-                <Tooltip formatter={(v: any) => formatNok(Number(v))} />
+                <YAxis tickFormatter={(v) => `${Math.round(Number(v))}`} />
+                <Tooltip formatter={(v: any) => tooltipMoney(v)} />
                 <Bar dataKey="value" />
               </BarChart>
             </ResponsiveContainer>
@@ -149,24 +190,33 @@ export default function OverviewClient() {
                 <div>
                   <p className="font-medium">{bestMonthGoal.title}</p>
                   <p className="text-sm text-slate-400">
-                    Grense: {formatNok(bestMonthGoal.limit)} · Brukt: {formatNok(data.month.expense)}
+                    Grense: {formatFromOre(toOreFromNokNumber(bestMonthGoal.limit))} · Brukt:{" "}
+                    {formatFromOre(monthExpenseOre)}
                   </p>
                 </div>
                 <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-300">
                   {monthGoalProgress}%
                 </span>
               </div>
+
               <div className="h-3 w-full overflow-hidden rounded-full border border-white/10 bg-white/5">
                 <div className="h-full rounded-full bg-white/20" style={{ width: `${monthGoalProgress}%` }} />
               </div>
-              <a href="/dashboard/goals" className="inline-flex rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm hover:bg-white/10 transition">
+
+              <a
+                href="/dashboard/goals"
+                className="inline-flex rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm hover:bg-white/10 transition"
+              >
                 Administrer mål
               </a>
             </div>
           ) : (
             <div className="text-slate-300">
               <p>Du har ingen mål ennå.</p>
-              <a href="/dashboard/goals" className="mt-3 inline-flex rounded-xl bg-indigo-500 px-4 py-2 text-sm font-medium hover:bg-indigo-400 transition">
+              <a
+                href="/dashboard/goals"
+                className="mt-3 inline-flex rounded-xl bg-indigo-500 px-4 py-2 text-sm font-medium hover:bg-indigo-400 transition"
+              >
                 Opprett mål
               </a>
             </div>

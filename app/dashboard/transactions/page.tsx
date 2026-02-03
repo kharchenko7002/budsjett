@@ -1,22 +1,19 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useCurrency } from "@/app/providers/currency-provider";
 
 type Category = { id: string; name: string; color: string };
 
 type Tx = {
   id: string;
   type: "EXPENSE" | "INCOME";
-  amount: number;
+  amountOre: number;
   description: string | null;
   date: string;
   categoryId: string | null;
   category: Category | null;
 };
-
-function formatNok(v: number) {
-  return new Intl.NumberFormat("nb-NO", { style: "currency", currency: "NOK" }).format(v);
-}
 
 function todayISO() {
   const d = new Date();
@@ -24,6 +21,8 @@ function todayISO() {
 }
 
 export default function TransactionsPage() {
+  const { formatFromOre, currency } = useCurrency();
+
   const [categories, setCategories] = useState<Category[]>([]);
   const [items, setItems] = useState<Tx[]>([]);
   const [type, setType] = useState<"EXPENSE" | "INCOME">("EXPENSE");
@@ -50,14 +49,18 @@ export default function TransactionsPage() {
   function loadTransactions() {
     setLoading(true);
     fetch("/api/transactions")
-      .then((r) => r.json())
+      .then(async (r) => {
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(typeof j?.error === "string" ? j.error : "Feil");
+        return j;
+      })
       .then((j) => {
         setItems(j.items ?? []);
         setError(null);
         setLoading(false);
       })
-      .catch(() => {
-        setError("Kunne ikke laste transaksjoner");
+      .catch((e) => {
+        setError(typeof e?.message === "string" ? e.message : "Kunne ikke laste transaksjoner");
         setLoading(false);
       });
   }
@@ -104,17 +107,18 @@ export default function TransactionsPage() {
   async function onDelete(id: string) {
     setError(null);
     const res = await fetch(`/api/transactions?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+    const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      setError("Kunne ikke slette transaksjon");
+      setError(typeof data?.error === "string" ? data.error : "Kunne ikke slette transaksjon");
       return;
     }
     loadTransactions();
   }
 
   const totals = useMemo(() => {
-    const expense = items.filter((t) => t.type === "EXPENSE").reduce((a, t) => a + t.amount, 0);
-    const income = items.filter((t) => t.type === "INCOME").reduce((a, t) => a + t.amount, 0);
-    return { expense, income, net: income - expense };
+    const expenseOre = items.filter((t) => t.type === "EXPENSE").reduce((a, t) => a + t.amountOre, 0);
+    const incomeOre = items.filter((t) => t.type === "INCOME").reduce((a, t) => a + t.amountOre, 0);
+    return { expenseOre, incomeOre, netOre: incomeOre - expenseOre };
   }, [items]);
 
   return (
@@ -125,10 +129,14 @@ export default function TransactionsPage() {
           <p className="text-slate-300">Registrer inntekter og utgifter.</p>
         </div>
         <div className="flex gap-3">
-          <Stat label="Utgifter" value={formatNok(totals.expense)} />
-          <Stat label="Inntekter" value={formatNok(totals.income)} />
-          <Stat label="Netto" value={formatNok(totals.net)} />
+          <Stat label="Utgifter" value={formatFromOre(totals.expenseOre)} />
+          <Stat label="Inntekter" value={formatFromOre(totals.incomeOre)} />
+          <Stat label="Netto" value={formatFromOre(totals.netOre)} />
         </div>
+      </div>
+
+      <div className="text-xs text-slate-400">
+        Valuta: <span className="font-semibold text-slate-200">{currency}</span>
       </div>
 
       {error ? (
@@ -160,7 +168,7 @@ export default function TransactionsPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm text-slate-300">Beløp (NOK)</label>
+              <label className="text-sm text-slate-300">Beløp</label>
               <input
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
@@ -168,6 +176,9 @@ export default function TransactionsPage() {
                 className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-slate-100 outline-none focus:border-white/20"
                 placeholder="F.eks. 249.90"
               />
+              <div className="text-xs text-slate-400">
+                Beløpet lagres i NOK i databasen, og vises i valgt valuta.
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -188,15 +199,13 @@ export default function TransactionsPage() {
                 className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-slate-100 outline-none focus:border-white/20"
               >
                 <option value="">Ukategorisert</option>
-                {categories.map((c: any) => (
+                {categories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
                   </option>
                 ))}
               </select>
-              <div className="text-xs text-slate-400">
-                Hvis listen er tom: lag kategorier først.
-              </div>
+              <div className="text-xs text-slate-400">Hvis listen er tom: lag kategorier først.</div>
             </div>
 
             <div className="space-y-2">
@@ -236,18 +245,16 @@ export default function TransactionsPage() {
               <div className="text-slate-300">Ingen transaksjoner ennå.</div>
             ) : (
               <div className="space-y-2">
-                {items.map((t: any) => (
-                  <div key={t.id} className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                {items.map((t) => (
+                  <div
+                    key={t.id}
+                    className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                  >
                     <div className="flex items-center gap-3">
-                      <span
-                        className="h-2.5 w-2.5 rounded-full"
-                        style={{ background: t.category?.color ?? "#94a3b8" }}
-                      />
+                      <span className="h-2.5 w-2.5 rounded-full" style={{ background: t.category?.color ?? "#94a3b8" }} />
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">
-                            {t.type === "EXPENSE" ? "Utgift" : "Inntekt"}
-                          </span>
+                          <span className="text-sm font-medium">{t.type === "EXPENSE" ? "Utgift" : "Inntekt"}</span>
                           <span className="text-xs text-slate-400">{new Date(t.date).toLocaleDateString("nb-NO")}</span>
                         </div>
                         <div className="text-xs text-slate-400">
@@ -260,7 +267,7 @@ export default function TransactionsPage() {
                     <div className="flex items-center justify-between gap-3 sm:justify-end">
                       <div className={`text-sm font-semibold ${t.type === "EXPENSE" ? "text-rose-200" : "text-emerald-200"}`}>
                         {t.type === "EXPENSE" ? "-" : "+"}
-                        {formatNok(t.amount)}
+                        {formatFromOre(t.amountOre)}
                       </div>
                       <button
                         onClick={() => onDelete(t.id)}

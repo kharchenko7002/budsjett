@@ -14,11 +14,11 @@ export async function GET() {
   });
 
   return NextResponse.json({
-    items: items.map((g: any) => ({
+    items: items.map((g) => ({
       id: g.id,
       title: g.title,
       period: g.period,
-      limit: g.limitOre / 100,
+      limitOre: g.limitOre,
       createdAt: g.createdAt,
     })),
   });
@@ -48,7 +48,7 @@ export async function POST(req: Request) {
       id: item.id,
       title: item.title,
       period: item.period,
-      limit: item.limitOre / 100,
+      limitOre: item.limitOre,
       createdAt: item.createdAt,
     },
   });

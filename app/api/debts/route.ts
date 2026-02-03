@@ -4,8 +4,6 @@ import { getSession } from "@/lib/session";
 
 export const runtime = "nodejs";
 
-const toNok = (ore: number) => ore / 100;
-
 export async function GET(req: Request) {
   const session = await getSession();
   if (!session) return NextResponse.json({ error: "Ikke innlogget" }, { status: 401 });
@@ -22,13 +20,13 @@ export async function GET(req: Request) {
   });
 
   return NextResponse.json({
-    items: items.map((d: any) => ({
+    items: items.map((d) => ({
       id: d.id,
       direction: d.direction,
       person: d.person,
       reason: d.reason,
-      amount: toNok(d.amountOre),
-      date: d.date,
+      amountOre: d.amountOre,
+      date: d.date.toISOString(),
       isPaid: d.isPaid,
       createdAt: d.createdAt,
     })),
@@ -73,8 +71,8 @@ export async function POST(req: Request) {
       direction: item.direction,
       person: item.person,
       reason: item.reason,
-      amount: toNok(item.amountOre),
-      date: item.date,
+      amountOre: item.amountOre,
+      date: item.date.toISOString(),
       isPaid: item.isPaid,
       createdAt: item.createdAt,
     },

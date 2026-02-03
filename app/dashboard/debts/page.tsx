@@ -1,20 +1,17 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useCurrency } from "@/app/providers/currency-provider";
 
 type Debt = {
   id: string;
   direction: "I_OWE" | "OWED_TO_ME";
   person: string;
   reason: string | null;
-  amount: number;
+  amountOre: number;
   date: string;
   isPaid: boolean;
 };
-
-function formatNok(v: number) {
-  return new Intl.NumberFormat("nb-NO", { style: "currency", currency: "NOK" }).format(v);
-}
 
 function todayISO() {
   const d = new Date();
@@ -22,6 +19,8 @@ function todayISO() {
 }
 
 export default function DebtsPage() {
+  const { formatFromOre } = useCurrency();
+
   const [items, setItems] = useState<Debt[]>([]);
   const [direction, setDirection] = useState<Debt["direction"]>("I_OWE");
   const [person, setPerson] = useState("");
@@ -126,9 +125,9 @@ export default function DebtsPage() {
 
   const totals = useMemo(() => {
     const open = items.filter((d) => !d.isPaid);
-    const iOwe = open.filter((d) => d.direction === "I_OWE").reduce((a, d) => a + d.amount, 0);
-    const owedToMe = open.filter((d) => d.direction === "OWED_TO_ME").reduce((a, d) => a + d.amount, 0);
-    return { iOwe, owedToMe, net: owedToMe - iOwe };
+    const iOweOre = open.filter((d) => d.direction === "I_OWE").reduce((a, d) => a + d.amountOre, 0);
+    const owedToMeOre = open.filter((d) => d.direction === "OWED_TO_ME").reduce((a, d) => a + d.amountOre, 0);
+    return { iOweOre, owedToMeOre, netOre: owedToMeOre - iOweOre };
   }, [items]);
 
   return (
@@ -139,9 +138,9 @@ export default function DebtsPage() {
           <p className="text-slate-300">Hold styr på hvem som skylder hvem, og hvorfor.</p>
         </div>
         <div className="flex gap-3">
-          <Stat label="Jeg skylder" value={formatNok(totals.iOwe)} />
-          <Stat label="Skyldes meg" value={formatNok(totals.owedToMe)} />
-          <Stat label="Netto" value={formatNok(totals.net)} />
+          <Stat label="Jeg skylder" value={formatFromOre(totals.iOweOre)} />
+          <Stat label="Skyldes meg" value={formatFromOre(totals.owedToMeOre)} />
+          <Stat label="Netto" value={formatFromOre(totals.netOre)} />
         </div>
       </div>
 
@@ -184,7 +183,7 @@ export default function DebtsPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm text-slate-300">Beløp (NOK)</label>
+              <label className="text-sm text-slate-300">Beløp</label>
               <input
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
@@ -192,6 +191,9 @@ export default function DebtsPage() {
                 className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-slate-100 outline-none focus:border-white/20"
                 placeholder="F.eks. 350"
               />
+              <div className="text-xs text-slate-400">
+                Beløpet lagres i NOK i databasen, og vises i valgt valuta.
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -249,8 +251,11 @@ export default function DebtsPage() {
               <div className="text-slate-300">Ingen poster.</div>
             ) : (
               <div className="space-y-2">
-                {items.map((d: any) => (
-                  <div key={d.id} className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                {items.map((d) => (
+                  <div
+                    key={d.id}
+                    className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                  >
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium">{d.person}</span>
@@ -272,7 +277,7 @@ export default function DebtsPage() {
                     <div className="flex items-center justify-between gap-3 sm:justify-end">
                       <div className={`text-sm font-semibold ${d.direction === "I_OWE" ? "text-rose-200" : "text-emerald-200"}`}>
                         {d.direction === "I_OWE" ? "-" : "+"}
-                        {formatNok(d.amount)}
+                        {formatFromOre(d.amountOre)}
                       </div>
 
                       <button

@@ -1,19 +1,22 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useCurrency } from "@/app/providers/currency-provider";
 
 type Goal = {
   id: string;
   title: string;
   period: "MONTH" | "YEAR";
-  limit: number;
+  limitOre: number;
 };
 
-function formatNok(v: number) {
-  return new Intl.NumberFormat("nb-NO", { style: "currency", currency: "NOK" }).format(v);
+function toOre(v: number) {
+  return Math.round(v * 100);
 }
 
 export default function GoalsPage() {
+  const { formatFromOre } = useCurrency();
+
   const [items, setItems] = useState<Goal[]>([]);
   const [title, setTitle] = useState("");
   const [period, setPeriod] = useState<"MONTH" | "YEAR">("MONTH");
@@ -113,7 +116,7 @@ export default function GoalsPage() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-slate-100 outline-none focus:border-white/20"
-                placeholder="F.eks. Maks 8000 NOK på mat"
+                placeholder="F.eks. Maks 8000 på mat"
               />
             </div>
 
@@ -123,14 +126,18 @@ export default function GoalsPage() {
                 <button
                   type="button"
                   onClick={() => setPeriod("MONTH")}
-                  className={`rounded-lg px-3 py-2 text-sm transition ${period === "MONTH" ? "bg-white/10" : "hover:bg-white/5"}`}
+                  className={`rounded-lg px-3 py-2 text-sm transition ${
+                    period === "MONTH" ? "bg-white/10" : "hover:bg-white/5"
+                  }`}
                 >
                   Måned
                 </button>
                 <button
                   type="button"
                   onClick={() => setPeriod("YEAR")}
-                  className={`rounded-lg px-3 py-2 text-sm transition ${period === "YEAR" ? "bg-white/10" : "hover:bg-white/5"}`}
+                  className={`rounded-lg px-3 py-2 text-sm transition ${
+                    period === "YEAR" ? "bg-white/10" : "hover:bg-white/5"
+                  }`}
                 >
                   År
                 </button>
@@ -138,7 +145,7 @@ export default function GoalsPage() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm text-slate-300">Grense (NOK)</label>
+              <label className="text-sm text-slate-300">Grense</label>
               <input
                 value={limit}
                 onChange={(e) => setLimit(e.target.value)}
@@ -146,6 +153,9 @@ export default function GoalsPage() {
                 className="w-full rounded-xl border border-white/10 bg-slate-950/40 px-4 py-3 text-slate-100 outline-none focus:border-white/20"
                 placeholder="F.eks. 8000"
               />
+              <div className="text-xs text-slate-400">
+                Beløpet lagres i NOK i databasen, og vises i valgt valuta.
+              </div>
             </div>
 
             <button
@@ -175,14 +185,19 @@ export default function GoalsPage() {
               <div className="text-slate-300">Ingen mål ennå.</div>
             ) : (
               <div className="space-y-2">
-                {items.map((g: any) => (
-                  <div key={g.id} className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                {items.map((g) => (
+                  <div
+                    key={g.id}
+                    className="flex flex-col gap-2 rounded-xl border border-white/10 bg-white/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                  >
                     <div>
                       <div className="text-sm font-medium">{g.title}</div>
                       <div className="text-xs text-slate-400">
-                        {g.period === "MONTH" ? "Måned" : "År"} · {formatNok(Number.isFinite(g.limit) ? g.limit : 0)}
+                        {g.period === "MONTH" ? "Måned" : "År"} ·{" "}
+                        {formatFromOre(Number.isFinite(g.limitOre) ? g.limitOre : toOre(0))}
                       </div>
                     </div>
+
                     <button
                       onClick={() => onDelete(g.id)}
                       className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs text-slate-200 hover:bg-white/10 transition"
