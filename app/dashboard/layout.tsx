@@ -12,22 +12,18 @@ export default async function DashboardLayout({
 }) {
   const store = await cookies();
   const initialCurrency = normalizeCurrency(
-    store.get(CURRENCY_COOKIE)?.value ??
-      process.env.CURRENCY_DEFAULT ??
-      "NOK"
+    store.get(CURRENCY_COOKIE)?.value ?? process.env.CURRENCY_DEFAULT ?? "NOK"
   );
 
   return (
     <CurrencyProvider initialCurrency={initialCurrency}>
       <div className="min-h-screen bg-slate-950 text-slate-100">
-        {/* Background blobs */}
         <div className="absolute inset-0 -z-10">
           <div className="absolute left-1/2 top-20 h-72 w-72 -translate-x-1/2 rounded-full bg-indigo-600/25 blur-3xl" />
           <div className="absolute left-1/3 top-72 h-72 w-72 rounded-full bg-fuchsia-600/15 blur-3xl" />
           <div className="absolute right-1/3 top-72 h-72 w-72 rounded-full bg-cyan-600/15 blur-3xl" />
         </div>
 
-        {/* Sticky top bar */}
         <div className="sticky top-0 z-20 border-b border-white/10 bg-slate-950/70 backdrop-blur">
           <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
             <div className="text-sm font-semibold">Budsjett</div>
@@ -43,7 +39,6 @@ export default async function DashboardLayout({
         </div>
 
         <div className="mx-auto max-w-6xl px-4 py-8">
-          {/* Page heading */}
           <div className="flex items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl font-semibold">Budsjett</h1>
